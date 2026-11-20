@@ -3,10 +3,10 @@
 Agente diario de búsqueda de empleo: descarga ofertas de APIs públicas, filtra, puntúa con Gemini contra el perfil y manda un correo. Hereda las reglas de `../CLAUDE.md`. Uso y arquitectura en `README.md`.
 
 ## Estado (2026-11-20)
-- Fase: MVP funcionando en local: Gemini puntúa (con reintentos y modelos de respaldo) y el correo llega (primer envío real 2026-11-20). 25 tests en verde.
-- Pendiente: crear el repo público en GitHub (con permiso del usuario) y cargar los secretos.
+- Fase: MVP funcionando en local y publicado en github.com/valdiwav/job-agent. Gemini 3.5 Flash puntúa; correo y Telegram (@ValdiLinked_bot) probados con envío real el 2026-11-20. 28 tests en verde.
+- Pendiente del usuario: ejecutar `scripts/cargar_secretos.ps1` para subir los secretos a GitHub.
 - Sin probar todavía: el workflow en GitHub Actions.
-- Siguiente paso: revisar con el usuario el primer correo y ajustar `config/criteria.yaml`; luego publicar en GitHub.
+- Siguiente paso: lanzar `gh workflow run daily.yml -f dry_run=true`, revisar el log y después ajustar `config/criteria.yaml` según las ofertas que lleguen.
 
 ## Comandos
 - Tests: `.venv/Scripts/python -m pytest -q`

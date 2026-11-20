@@ -11,9 +11,9 @@ from .models import Job
 
 log = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "gemini-3.8-flash"  # se puede cambiar con GEMINI_MODEL
+DEFAULT_MODEL = "gemini-3.5-flash"  # el más fiable en el nivel gratuito (nov. 2026); se cambia con GEMINI_MODEL
 # Si el modelo principal está saturado (503/429) o retirado (404), se prueban estos en orden.
-FALLBACK_MODELS = ["gemini-3.7-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+FALLBACK_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.1-flash-lite"]
 RETRY_WAITS = [10, 30]  # segundos entre reintentos con el mismo modelo
 BATCH_SIZE = 8
 PAUSE_SECONDS = 7  # margen para el límite de peticiones por minuto del nivel gratuito
