@@ -11,7 +11,10 @@ from .models import Job
 
 log = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.8-flash"  # se puede cambiar con GEMINI_MODEL
+# Si el modelo principal está saturado (503/429) o retirado (404), se prueban estos en orden.
+FALLBACK_MODELS = ["gemini-3.7-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+RETRY_WAITS = [10, 30]  # segundos entre reintentos con el mismo modelo
 BATCH_SIZE = 8
 PAUSE_SECONDS = 7  # margen para el límite de peticiones por minuto del nivel gratuito
 DESC_CHARS = 2500
@@ -54,6 +57,36 @@ def _describe(i: int, job: Job) -> str:
     return "\n".join(parts)
 
 
+def _status(exc: Exception) -> int | None:
+    code = getattr(exc, "code", None)
+    return code if isinstance(code, int) else None
+
+
+def _generate(client, models: list[str], prompt: str, config) -> tuple[Batch, str]:
+    """Llama a Gemini con reintentos y modelos de respaldo. Devuelve (resultado, modelo usado)."""
+    last: Exception | None = None
+    for model in models:
+        for attempt in range(len(RETRY_WAITS) + 1):
+            try:
+                resp = client.models.generate_content(model=model, contents=prompt, config=config)
+                parsed = resp.parsed if isinstance(resp.parsed, Batch) else Batch.model_validate_json(resp.text)
+                return parsed, model
+            except Exception as exc:
+                last = exc
+                status = _status(exc)
+                if status == 404:
+                    break  # modelo retirado: pasar al siguiente
+                if status in (429, 500, 503) and attempt < len(RETRY_WAITS):
+                    time.sleep(RETRY_WAITS[attempt])
+                    continue
+                if status in (429, 500, 503):
+                    break  # sigue saturado: probar otro modelo
+                raise  # error de clave, petición, etc.: no tiene sentido insistir
+        log.info("Modelo %s no disponible (%s), probando el siguiente", model, _status(last) if last else "?")
+    assert last is not None
+    raise last
+
+
 def score_jobs(jobs: list[Job], profile: str, api_key: str | None = None, model: str | None = None) -> int:
     """Rellena ai_score/ai_reason/… en cada Job. Devuelve cuántas ofertas se puntuaron.
 
@@ -66,7 +99,13 @@ def score_jobs(jobs: list[Job], profile: str, api_key: str | None = None, model:
     from google.genai import types
 
     client = genai.Client(api_key=api_key)
-    model = model or os.getenv("GEMINI_MODEL", DEFAULT_MODEL)
+    primary = model or os.getenv("GEMINI_MODEL", DEFAULT_MODEL)
+    models = [primary, *[m for m in FALLBACK_MODELS if m != primary]]
+    config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=Batch,
+        temperature=0.2,
+    )
     scored = 0
     for start in range(0, len(jobs), BATCH_SIZE):
         batch = jobs[start:start + BATCH_SIZE]
@@ -75,19 +114,14 @@ def score_jobs(jobs: list[Job], profile: str, api_key: str | None = None, model:
             + "\n\n".join(_describe(i, j) for i, j in enumerate(batch))
         )
         try:
-            resp = client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=Batch,
-                    temperature=0.2,
-                ),
-            )
-            result: Batch = resp.parsed if isinstance(resp.parsed, Batch) else Batch.model_validate_json(resp.text)
+            result, used = _generate(client, models, prompt, config)
         except Exception as exc:
             log.warning("Gemini falló en el lote %d: %s", start // BATCH_SIZE, exc)
             continue
+        if used != models[0]:
+            # Si el principal falló, los lotes siguientes empiezan por el que sí respondió.
+            models = [used, *[m for m in models if m != used]]
+        log.info("Lote %d puntuado con %s", start // BATCH_SIZE, used)
         for a in result.items:
             if 0 <= a.index < len(batch):
                 job = batch[a.index]

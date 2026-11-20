@@ -40,6 +40,28 @@ def test_scores_are_applied(monkeypatch):
     assert "perfil" in calls[0] and "AI Eng" in calls[0]
 
 
+def test_falls_back_when_model_busy_or_retired(monkeypatch):
+    class ApiError(Exception):
+        def __init__(self, code):
+            self.code = code
+
+    tried = []
+
+    class Client:
+        def generate_content(self, model, contents, config):
+            tried.append(model)
+            if model == "a":
+                raise ApiError(503)
+            if model == "b":
+                raise ApiError(404)
+            return types.SimpleNamespace(parsed=scorer.Batch(items=[]), text="")
+
+    monkeypatch.setattr(scorer, "RETRY_WAITS", [0])
+    _, used = scorer._generate(types.SimpleNamespace(models=Client()), ["a", "b", "c"], "p", {})
+    assert used == "c"
+    assert tried == ["a", "a", "b", "c"]  # reintenta el saturado una vez; el retirado no
+
+
 def test_without_key_keeps_keyword_score(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     jobs = [Job(source="T", id="1", title="AI Eng", company="C", url="u", keyword_score=40)]

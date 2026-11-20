@@ -3,10 +3,10 @@
 Agente diario de búsqueda de empleo: descarga ofertas de APIs públicas, filtra, puntúa con Gemini contra el perfil y manda un correo. Hereda las reglas de `../CLAUDE.md`. Uso y arquitectura en `README.md`.
 
 ## Estado (2026-11-20)
-- Fase: MVP implementado y probado en local en modo `--dry-run --no-ai` (505 ofertas descargadas, 21 pasan filtros). 24 tests en verde.
-- Pendiente del usuario: crear la clave de Gemini y la contraseña de aplicación de Gmail, crear el repo en GitHub y cargar los secretos.
-- Sin probar todavía: la puntuación real con Gemini, el envío por correo y el workflow en GitHub Actions.
-- Siguiente paso: primera ejecución real con `GEMINI_API_KEY` en `.env` y ajustar `config/criteria.yaml` según los resultados.
+- Fase: MVP funcionando en local: Gemini puntúa (con reintentos y modelos de respaldo) y el correo llega (primer envío real 2026-11-20). 25 tests en verde.
+- Pendiente: crear el repo público en GitHub (con permiso del usuario) y cargar los secretos.
+- Sin probar todavía: el workflow en GitHub Actions.
+- Siguiente paso: revisar con el usuario el primer correo y ajustar `config/criteria.yaml`; luego publicar en GitHub.
 
 ## Comandos
 - Tests: `.venv/Scripts/python -m pytest -q`

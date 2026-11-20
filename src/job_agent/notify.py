@@ -60,7 +60,7 @@ def send_email(subject: str, html_body: str) -> None:
     host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     port = int(os.getenv("SMTP_PORT", "465"))
     user = os.environ["SMTP_USER"]
-    password = os.environ["SMTP_PASSWORD"]
+    password = os.environ["SMTP_PASSWORD"].replace(" ", "")  # Gmail muestra la contraseña de aplicación con espacios
     to = os.getenv("EMAIL_TO", user)
 
     msg = EmailMessage()
