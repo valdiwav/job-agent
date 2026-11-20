@@ -4,9 +4,9 @@ Agente diario de búsqueda de empleo: descarga ofertas de APIs públicas, filtra
 
 ## Estado (2026-11-20)
 - Fase: MVP funcionando en local y publicado en github.com/valdiwav/job-agent. Gemini 3.5 Flash puntúa; correo y Telegram (@ValdiLinked_bot) probados con envío real el 2026-11-20. 28 tests en verde.
-- Pendiente del usuario: ejecutar `scripts/cargar_secretos.ps1` para subir los secretos a GitHub.
-- Sin probar todavía: el workflow en GitHub Actions.
-- Siguiente paso: lanzar `gh workflow run daily.yml -f dry_run=true`, revisar el log y después ajustar `config/criteria.yaml` según las ofertas que lleguen.
+- En producción: GitHub Actions corre cada día a las 08:00 de Santiago (secretos cargados; prueba en modo dry-run OK el 2026-11-20).
+- Ojo: GitHub desactiva los cron de repos públicos tras 60 días sin commits; reactivar desde la pestaña Actions si deja de llegar.
+- Siguiente paso: tras unos días de avisos, ajustar `config/criteria.yaml` (palabras clave, exclusiones, nota mínima) según lo que llegue.
 
 ## Comandos
 - Tests: `.venv/Scripts/python -m pytest -q`
