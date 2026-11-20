@@ -50,7 +50,7 @@ El workflow `.github/workflows/daily.yml` corre cada día a las 08:00 de Santiag
 | Secret | `EMAIL_TO` | Dónde recibir el resumen |
 | Variable | `MIN_SALARY_CLP` | Sueldo mínimo mensual en CLP (por defecto 1.700.000) |
 
-Para cargarlos desde tu `.env` y `profile.md` sin copiarlos a mano: `powershell -ExecutionPolicy Bypass -File scriptsrgar_secretos.ps1`.
+Para cargarlos desde tu `.env` y `profile.md` sin copiarlos a mano: `powershell -ExecutionPolicy Bypass -File scripts\cargar_secretos.ps1`.
 
 Los criterios (palabras clave, ubicaciones, empresas a vigilar) están en `config/criteria.yaml`.
 
