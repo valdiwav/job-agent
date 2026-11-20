@@ -1,0 +1,106 @@
+# Criterios de búsqueda. El sueldo mínimo y el perfil no van aquí:
+# se leen de variables de entorno (MIN_SALARY_CLP) y de profile.md / el secreto PROFILE_TEXT.
+
+# Términos que se buscan en las APIs que admiten búsqueda.
+search_queries:
+  - automation
+  - automatización
+  - AI engineer
+  - LLM
+  - AI agents
+  - forward deployed
+  - implementation engineer
+  - solutions engineer
+  - RPA
+  - n8n
+  - python
+
+# Una oferta debe contener al menos uno de estos términos en el título
+# (o dos en la descripción) para pasar el primer filtro.
+include_keywords:
+  - automation
+  - automatización
+  - automatizacion
+  - ai
+  - ia
+  - artificial intelligence
+  - inteligencia artificial
+  - llm
+  - genai
+  - generative
+  - agent
+  - agente
+  - forward deployed
+  - implementation
+  - implementación
+  - solutions engineer
+  - integration
+  - integraciones
+  - rpa
+  - n8n
+  - zapier
+  - make.com
+  - power automate
+  - python
+  - data analyst
+  - analista de datos
+  - prompt
+
+# Si el título contiene alguno de estos, la oferta se descarta.
+exclude_title_keywords:
+  - lead
+  - staff
+  - principal
+  - director
+  - head of
+  - vp
+  - vice president
+  - manager
+  - qa
+  - sdet
+  - tester
+  - test automation
+  - sales
+  - presales
+  - pre-sales
+  - counsel
+  - legal
+  - ventas
+  - marketing
+  - teaching
+  - tutor
+  - recruiter
+  - sr
+  - senior
+
+# Ubicaciones aceptadas en las restricciones de la oferta (sin distinguir mayúsculas).
+# Una oferta remota sin restricciones de ubicación también se acepta.
+accepted_locations:
+  - chile
+  - latam
+  - latin america
+  - latinoamérica
+  - south america
+  - americas
+  - worldwide
+  - anywhere
+  - global
+
+# Se aceptan ofertas híbridas solo si son en estas ciudades (se marcan y la IA las penaliza).
+hybrid_cities:
+  - santiago
+
+# Antigüedad máxima de una oferta, en días.
+max_age_days: 7
+
+# Tipo de cambio aproximado para comparar sueldos en USD con el mínimo en CLP.
+usd_to_clp: 950
+
+# Cuántas ofertas, como máximo, se mandan a la IA y cuántas salen en el correo.
+max_to_score: 40
+max_in_email: 15
+
+# Empresas con bolsa de empleo pública en Greenhouse o Lever (slug de la URL).
+# Ejemplo: https://boards.greenhouse.io/<slug>  ·  https://jobs.lever.co/<slug>
+greenhouse_companies: []
+lever_companies: []
