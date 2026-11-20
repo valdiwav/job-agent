@@ -99,6 +99,7 @@ usd_to_clp: 950
 # Cuántas ofertas, como máximo, se mandan a la IA y cuántas salen en el correo.
 max_to_score: 40
 max_in_email: 15
+max_in_telegram: 8
 
 # Empresas con bolsa de empleo pública en Greenhouse o Lever (slug de la URL).
 # Ejemplo: https://boards.greenhouse.io/<slug>  ·  https://jobs.lever.co/<slug>

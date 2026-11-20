@@ -17,15 +17,17 @@ foreach ($line in Get-Content $envFile -Encoding UTF8) {
     $values[$k.Trim()] = $v.Trim().Trim('"').Trim("'")
 }
 
-foreach ($name in "GEMINI_API_KEY", "SMTP_USER", "SMTP_PASSWORD", "EMAIL_TO") {
-    if (-not $values[$name]) { throw "Falta $name en .env" }
+if (-not $values["GEMINI_API_KEY"]) { throw "Falta GEMINI_API_KEY en .env" }
+# Se suben las claves que tengan valor; correo y Telegram son opcionales (al menos uno).
+foreach ($name in "GEMINI_API_KEY", "SMTP_USER", "SMTP_PASSWORD", "EMAIL_TO", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID") {
+    if (-not $values[$name]) { Write-Host "($name vacío en .env, se omite)"; continue }
     $values[$name] | gh secret set $name
     Write-Host "Secreto $name guardado"
 }
 
-$profile = Join-Path $root "profile.md"
-if (Test-Path $profile) {
-    Get-Content $profile -Raw -Encoding UTF8 | gh secret set PROFILE_TEXT
+$profileFile = Join-Path $root "profile.md"
+if (Test-Path $profileFile) {
+    Get-Content $profileFile -Raw -Encoding UTF8 | gh secret set PROFILE_TEXT
     Write-Host "Secreto PROFILE_TEXT guardado"
 }
 

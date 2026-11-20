@@ -7,7 +7,7 @@ Lo hice para dejar de revisar portales a mano. Inspiración: el consejo de usar 
 ```
  Get on Board ─┐
  Remotive ─────┤                 ┌─ antigüedad ≤ 7 días
- Himalayas ────┼─► 500 ofertas ─►├─ título relevante / sin seniority alta ─► ~20 ─► Gemini ─► top 15 ─► correo
+ Himalayas ────┼─► 500 ofertas ─►├─ título relevante / sin seniority alta ─► ~20 ─► Gemini ─► top 15 ─► Telegram / correo
  Remote OK ────┤                 ├─ remoto (o híbrido en Santiago)            puntúa 0-100,
  We Work ──────┤                 ├─ ubicación compatible con Chile/LATAM      explica encaje
  Remotely      │                 ├─ sueldo publicado ≥ mínimo                 y carencias
@@ -20,7 +20,7 @@ Lo hice para dejar de revisar portales a mano. Inspiración: el consejo de usar 
 - **6 fuentes** con APIs o feeds públicos: Get on Board (Chile/LATAM), Remotive, Himalayas, Remote OK, We Work Remotely y las bolsas Greenhouse/Lever de las empresas que elijas. No hace scraping de LinkedIn.
 - **Filtros deterministas** (`src/job_agent/filters.py`): palabras clave con límites de palabra, exclusión por título (senior, lead, QA, ventas…), restricciones de país, modalidad, sueldo normalizado a USD mensuales y deduplicación entre fuentes.
 - **Puntuación con LLM** (`src/job_agent/scorer.py`): Gemini recibe el perfil y lotes de 8 ofertas y devuelve JSON validado con Pydantic (puntuación, por qué encaja, qué falta, nivel de inglés exigido). Si no hay clave o la API falla, se usa la puntuación por palabras clave.
-- **Correo HTML diario** con enlace a cada oferta original y la fuente citada, como piden las condiciones de Remotive y Remote OK.
+- **Aviso diario por Telegram** (las 8 mejores, con nota y motivo) y/o **correo HTML** con enlace a cada oferta original y la fuente citada, como piden las condiciones de Remotive y Remote OK.
 - **Memoria**: no repite ofertas ya enviadas (60 días), guardada con `actions/cache`.
 - **Tests** de filtros, sueldos, parseo de fuentes y del puntuador con un cliente simulado.
 
@@ -48,6 +48,8 @@ El workflow `.github/workflows/daily.yml` corre cada día a las 08:00 de Santiag
 | Secret | `SMTP_USER` | Tu Gmail |
 | Secret | `SMTP_PASSWORD` | [Contraseña de aplicación](https://myaccount.google.com/apppasswords) de Gmail (no tu contraseña normal) |
 | Secret | `EMAIL_TO` | Dónde recibir el resumen |
+| Secret | `TELEGRAM_BOT_TOKEN` | Token del bot creado con [@BotFather](https://t.me/BotFather) (opcional) |
+| Secret | `TELEGRAM_CHAT_ID` | Tu chat con el bot; se obtiene con `scripts/telegram_chat_id.py` (opcional) |
 | Variable | `MIN_SALARY_CLP` | Sueldo mínimo mensual en CLP (por defecto 1.700.000) |
 
 Para cargarlos desde tu `.env` y `profile.md` sin copiarlos a mano: `powershell -ExecutionPolicy Bypass -File scripts\cargar_secretos.ps1`.

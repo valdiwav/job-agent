@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from . import filters, notify, scorer, sources, state
+from . import filters, notify, scorer, sources, state, telegram
 
 ROOT = Path(__file__).resolve().parents[2]
 log = logging.getLogger("job_agent")
@@ -68,11 +68,30 @@ def run(dry_run: bool, use_ai: bool) -> int:
         return 0
 
     best = top[0].final_score if top else 0
-    notify.send_email(f"🔎 {len(top)} ofertas IA/automatización · mejor {best}/100 · {date.today():%d-%m}", body)
+    channels = {}
+    if os.getenv("SMTP_USER") and os.getenv("SMTP_PASSWORD"):
+        channels["correo"] = lambda: notify.send_email(
+            f"🔎 {len(top)} ofertas IA/automatización · mejor {best}/100 · {date.today():%d-%m}", body)
+    if telegram.is_configured():
+        channels["Telegram"] = lambda: telegram.send(
+            telegram.render(top, len(candidates), int(criteria.get("max_in_telegram", 8))))
+    if not channels:
+        log.error("No hay canal configurado: define SMTP_* o TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID")
+        return 1
+
+    sent = []
+    for name, send in channels.items():
+        try:
+            send()
+            sent.append(name)
+            log.info("Enviado por %s", name)
+        except Exception as exc:  # un canal caído no debe impedir el otro
+            log.error("Falló el envío por %s: %s", name, exc)
+    if not sent:
+        return 1
     # Se marcan todas las puntuadas para no gastar IA en ellas mañana.
     state.save(state_path, seen, [j.key for j in to_score])
-    log.info("Correo enviado")
-    return 0
+    return 0 if len(sent) == len(channels) else 1
 
 
 def main() -> None:
